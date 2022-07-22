@@ -15,13 +15,13 @@ bool AlphaTest = true;
 bool AlphaTestGreater = true;
 float AlphaTestValue = 0.5f;
 
-Texture2D Texture00 : register(t0);
-sampler Sampler00 : register(s0)
+Texture2D Texture : register(t0);
+sampler Sampler : register(s0)
 {
-	Texture = (Texture00);
+	Texture = (Texture);
 	MinFilter = Point; // Minification Filter
-    MagFilter = Point;// Magnification Filter
-    MipFilter = Linear; // Mip-mapping
+	MagFilter = Point;// Magnification Filter
+	MipFilter = Linear; // Mip-mapping
 	AddressU = Wrap; // Address Mode for U Coordinates
 	AddressV = Wrap; // Address Mode for V Coordinates
 };
@@ -37,7 +37,7 @@ struct VertexShaderOutput
 {
 	float4 Position : SV_POSITION;
 	float4 Color : COLOR0;
-	float2 TextureCoordinate : TEXCOORD1;
+	float2 TextureCoordinate : TEXCOORD0;
 };
 
 VertexShaderOutput MainVS(in VertexShaderInput input)
@@ -48,26 +48,24 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	float4 color = input.Color;
 	float2 textureCoordinate = input.TextureCoordinate;
 
-    float4 worldPosition = mul(position, World);
-    float4 viewPosition = mul(worldPosition, View);
-    
-    output.Position = mul(viewPosition, Projection);
-    output.Color = color;
-    output.TextureCoordinate = textureCoordinate;
+	float4 worldPosition = mul(position, World);
+	float4 viewPosition = mul(worldPosition, View);
+
+	output.Position = mul(viewPosition, Projection);
+	output.Color = color;
+	output.TextureCoordinate = textureCoordinate;
 
 	return output;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-	float4 color = tex2D(Sampler00, input.TextureCoordinate) * input.Color;
+	float4 color = tex2D(Sampler, input.TextureCoordinate) * input.Color;
 	if (AlphaTest) {
-	    clip((color.a - AlphaTestValue) * (AlphaTestGreater ? 1 : -1));
-    }
-    return color;
+		clip((color.a - AlphaTestValue) * (AlphaTestGreater ? 1 : -1));
+    	}
+    	return color;
 }
-
-
 
 technique BasicColorDrawing
 {
